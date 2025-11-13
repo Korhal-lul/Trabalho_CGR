@@ -14,20 +14,6 @@ O objetivo é gerar imagens 3D realistas simulando o comportamento físico da lu
 
 ---
 
-## 🧩 Estrutura do Projeto
-raytracer/
-├── main.cpp # Função principal — define cena e câmera
-├── camera.h # Classe Camera (gera e dispara os raios)
-├── vec3.h # Vetores e operações matemáticas básicas
-├── ray.h # Representação de um raio
-├── color.h # Manipulação e escrita de cores
-├── hittable.h # Interface de objetos que podem ser atingidos
-├── sphere.h # Implementação de esfera como objeto geométrico
-├── material.h # Tipos de materiais (difuso, metálico, etc.)
-└── stb_image_write.h # Biblioteca para salvar imagens em PNG
-
----
-
 ## 🧮 Funcionamento
 
 O programa dispara um **raio por pixel** (com múltiplas amostras para suavização) e calcula:
