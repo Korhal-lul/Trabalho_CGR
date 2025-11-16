@@ -24,7 +24,7 @@ int main() {
 
     #if USE_OBJ
         std::cout << "*-*-*-*-*-* Modo: carregando arquivo obj *-*-*-*-*-*" << std::endl;
-        std::string obj_file = "caneca.obj";
+        std::string obj_file = "objetos/caneca_tras.obj";
         auto material_object = make_shared<metal>(color(0.85, 0.7, 0.2), 0.05);
         
         std::cout << "Carregando arquivo: " << obj_file << std::endl;
@@ -91,9 +91,9 @@ int main() {
     camera cam;
 
     cam.aspect_ratio      = 16.0 / 9.0;
-    cam.image_width       = 1000;          // maior -> melhor qualidade
-    cam.samples_per_pixel = 100;          // maior -> menos ruído
-    cam.max_depth         = 20;           // maior -> reflexões mais profundas
+    cam.image_width       = 1200;          // maior -> melhor qualidade
+    cam.samples_per_pixel = 200;          // maior -> menos ruído
+    cam.max_depth         = 30;           // maior -> reflexões mais profundas
 
     #if USE_OBJ
         cam.vfov = 40;
