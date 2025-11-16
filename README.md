@@ -33,3 +33,13 @@ O render é salvo automaticamente em formato **PNG**, utilizando `stbi_write_png
 
 ```cpp
 stbi_write_png("output.png", image_width, image_height, 3, image_data.data(), image_width * 3);
+
+---
+
+## ▶️ Como compilar e executar
+
+Para compilar o projeto diretamente pelo terminal, certifique-se de estar na pasta onde o arquivo main.cpp está localizado.
+Então, execute:
+g++ -o raytracer main.cpp -std=c++17 2>&1
+./raytracer
+Após a execução, o arquivo output.png será criado no mesmo diretório.

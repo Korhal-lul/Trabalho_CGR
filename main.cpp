@@ -25,7 +25,7 @@ int main() {
     #if USE_OBJ
         std::cout << "*-*-*-*-*-* Modo: carregando arquivo obj *-*-*-*-*-*" << std::endl;
         std::string obj_file = "caneca.obj";
-        auto material_object = make_shared<lambertian>(color(0.8, 0.8, 0.0));
+        auto material_object = make_shared<metal>(color(0.85, 0.7, 0.2), 0.05);
         
         std::cout << "Carregando arquivo: " << obj_file << std::endl;
         hittable_list obj_world = obj_loader::load(obj_file, material_object);
@@ -33,11 +33,21 @@ int main() {
         std::cout << "Triangulos carregados: " << obj_world.objects.size() << std::endl;
         
         if (obj_world.objects.size() > 0) {
-            std::cout << "BVH compilado" << std::endl;
+            world.add(make_shared<bvh_node>(obj_world));
+            std::cout << "BVH compilado!" << std::endl;
         } else {
             std::cout << "ERRO: Nenhum triangulo carregado!" << std::endl;
             return 1;
         }
+
+        // Adicionar 2 esferas metálicas para refletir
+        std::cout << "Adicionando esferas metálicas..." << std::endl;
+        auto material_metal_red = make_shared<metal>(color(0.9, 0.3, 0.2), 0.1);
+        auto material_metal_blue = make_shared<metal>(color(0.2, 0.4, 0.9), 0.15);
+        
+        world.add(make_shared<sphere>(point3(-8, 8, -5), 2.0, material_metal_red));
+        world.add(make_shared<sphere>(point3(12, 6, 8), 1.5, material_metal_blue));
+        std::cout << "Esferas adicionadas!" << std::endl;
 
         hit_record bbox_rec;
         world.bbox(bbox_rec);
@@ -59,13 +69,9 @@ int main() {
             std::cout << "Scene center: (" << center.x() << ", " << center.y() << ", " << center.z() << ")\n";
             std::cout << "Scene radius ~ " << radius << " ; setting camera at distance " << distance << std::endl;
 
-            // Save computed camera values in static locals so we can read them later
             AUTO_CAM_POS = cam_pos;
             AUTO_CAM_LOOKAT = center;
             AUTO_CAM_SET = true;
-
-            // Expose via global pointers (cheaper than redesign)
-            // We'll store pointers to these static variables in global variables
         }
     #else
         std::cout << "*-*-*-*-*-* Modo: teste com esferas *-*-*-*-*-*" << std::endl;
@@ -85,16 +91,15 @@ int main() {
     camera cam;
 
     cam.aspect_ratio      = 16.0 / 9.0;
-    cam.image_width       = 800;          // maior -> + qualidade
-    cam.samples_per_pixel = 100;          // maior -> - ruído
-    cam.max_depth         = 20;           // maior -> mais reflexões
+    cam.image_width       = 1000;          // maior -> melhor qualidade
+    cam.samples_per_pixel = 100;          // maior -> menos ruído
+    cam.max_depth         = 20;           // maior -> reflexões mais profundas
 
     #if USE_OBJ
         cam.vfov = 40;
         if (AUTO_CAM_SET) {
             cam.lookfrom = AUTO_CAM_POS;
             cam.lookat = AUTO_CAM_LOOKAT;
-            // recompute focus distance as distance from lookfrom to lookat
             cam.focus_dist = (cam.lookfrom - cam.lookat).length();
             std::cout << "Using auto camera: lookfrom=(" << cam.lookfrom.x() << "," << cam.lookfrom.y() << "," << cam.lookfrom.z() << ")\n";
         } else {
@@ -113,5 +118,6 @@ int main() {
     cam.defocus_angle = 0.0;
 
     cam.render(world);
+    std::cout << "Renderizacao completa!" << std::endl;
     std::cout << "Resultado salvo em: output.png" << std::endl;
 }
