@@ -2,6 +2,7 @@
 #define HITTABLE_LIST_H
 
 #include "hittable.h"
+#include "aabb.h"
 
 #include <vector>
 #include "rtweekend.h"
@@ -33,6 +34,26 @@ class hittable_list : public hittable {
         }
 
         return hit_anything;
+    }
+
+    void bbox(hit_record& rec) const override {
+        if (objects.empty()) {
+            rec.bbox_ptr = nullptr;
+            return;
+        }
+
+        hit_record temp_rec;
+        aabb output_box;
+        
+        for (const auto& object : objects) {
+            object->bbox(temp_rec);
+            if (temp_rec.bbox_ptr) {
+                output_box = aabb(output_box, *temp_rec.bbox_ptr);
+                delete temp_rec.bbox_ptr;
+            }
+        }
+        
+        rec.bbox_ptr = new aabb(output_box);
     }
 };
 

@@ -3,6 +3,7 @@
 
 #include "hittable.h"
 #include "vec3.h"
+#include "aabb.h"
 
 class sphere : public hittable {
   public:
@@ -39,7 +40,10 @@ class sphere : public hittable {
         return true;
     }
 
-  private:
+    void bbox(hit_record& rec) const override {
+        point3 rvec(radius, radius, radius);
+        rec.bbox_ptr = new aabb(center - rvec, center + rvec);
+    }
     point3 center;
     double radius;
     shared_ptr<material> mat;

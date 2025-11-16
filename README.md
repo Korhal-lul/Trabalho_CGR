@@ -10,6 +10,8 @@ O objetivo é gerar imagens 3D realistas simulando o comportamento físico da lu
 - Múltiplos materiais  
 - Profundidade de campo  
 - Anti-aliasing por amostragem múltipla  
+- **Carregamento de modelos OBJ** (triângulos) 
+- **BVH (Bounding Volume Hierarchy)** para aceleração
 - E saída direta em **formato PNG** utilizando a biblioteca **stb_image_write**
 
 ---

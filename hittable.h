@@ -4,6 +4,7 @@
 #include "rtweekend.h"
 
 class material;
+class aabb;
 
 class hit_record {
   public:
@@ -12,6 +13,9 @@ class hit_record {
     shared_ptr<material> mat;
     double t;
     bool front_face;
+    aabb* bbox_ptr;
+
+    hit_record() : bbox_ptr(nullptr) {}
 
     void set_face_normal(const ray& r, const vec3& outward_normal) {
         // Sets the hit record normal vector.
@@ -26,6 +30,7 @@ class hittable {
     virtual ~hittable() = default;
 
     virtual bool hit(const ray& r, interval ray_t, hit_record& rec) const = 0;
+    virtual void bbox(hit_record& rec) const = 0;
 };
 
 #endif
