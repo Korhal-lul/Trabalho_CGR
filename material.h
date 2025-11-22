@@ -41,7 +41,10 @@ class metal : public material {
     bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered)
     const override {
       vec3 reflected = reflect(r_in.direction(), rec.normal);
+      // Normalize and add fuzz perturbation
       reflected = unit_vector(reflected) + (fuzz * random_unit_vector());
+      // Ensure the scattered ray doesn't point back into the surface
+      reflected = unit_vector(reflected);
       scattered = ray(rec.p, reflected);
       attenuation = albedo;
       return (dot(scattered.direction(), rec.normal) > 0);

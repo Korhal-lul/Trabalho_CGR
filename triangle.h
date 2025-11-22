@@ -7,8 +7,18 @@
 
 class triangle : public hittable {
   public:
+    // Constructor without smooth normals (compute from geometry)
     triangle(const point3& v0, const point3& v1, const point3& v2, shared_ptr<material> mat)
-        : v0(v0), v1(v1), v2(v2), mat(mat) {}
+        : v0(v0), v1(v1), v2(v2), mat(mat), 
+          n0(vec3(0,0,0)), n1(vec3(0,0,0)), n2(vec3(0,0,0)), 
+          use_smooth_normals(false) {}
+    
+    // Constructor with smooth normals (from OBJ vn)
+    triangle(const point3& v0, const point3& v1, const point3& v2, shared_ptr<material> mat,
+             const vec3& n0, const vec3& n1, const vec3& n2)
+        : v0(v0), v1(v1), v2(v2), mat(mat), 
+          n0(n0), n1(n1), n2(n2),
+          use_smooth_normals(!(n0.length() < 0.001 && n1.length() < 0.001 && n2.length() < 0.001)) {}
 
     bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
         // Möller-Trumbore ray-triangle intersection algorithm
@@ -46,7 +56,18 @@ class triangle : public hittable {
 
         rec.t = t;
         rec.p = r.at(rec.t);
-        vec3 outward_normal = unit_vector(cross(edge1, edge2));
+        
+        // Use smooth normals if available, otherwise compute from geometry
+        vec3 outward_normal;
+        if (use_smooth_normals) {
+            // Interpolate smooth normals using barycentric coordinates
+            double w = 1.0 - u - v;
+            outward_normal = unit_vector(w * n0 + u * n1 + v * n2);
+        } else {
+            // Compute face normal using cross product
+            outward_normal = unit_vector(cross(edge1, edge2));
+        }
+        
         rec.set_face_normal(r, outward_normal);
         rec.mat = mat;
 
@@ -58,8 +79,12 @@ class triangle : public hittable {
         aabb box1(v0, v2);
         rec.bbox_ptr = new aabb(box0, box1);
     }
+    
+  private:
     point3 v0, v1, v2;
+    vec3 n0, n1, n2;  // Smooth normals for each vertex
     shared_ptr<material> mat;
+    bool use_smooth_normals;
 };
 
 #endif

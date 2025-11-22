@@ -16,6 +16,7 @@ class obj_loader {
     static hittable_list load(const std::string& filename, shared_ptr<material> mat) {
         hittable_list result;
         std::vector<point3> vertices;
+        std::vector<vec3> normals;
         std::ifstream file(filename);
 
         if (!file.is_open()) {
@@ -41,33 +42,60 @@ class obj_loader {
                 double x, y, z;
                 iss >> x >> y >> z;
                 vertices.push_back(point3(x, y, z));
-            } 
+            }
+            else if (type == "vn") {
+                // Vertex normal
+                double x, y, z;
+                iss >> x >> y >> z;
+                normals.push_back(vec3(x, y, z));
+            }
             else if (type == "f") {
                 // Face (we support triangulated faces)
-                std::vector<int> indices;
+                std::vector<int> v_indices;
+                std::vector<int> n_indices;
                 std::string vertex_str;
 
                 while (iss >> vertex_str) {
                     // Handle formats: v, v/vt, v//vn, v/vt/vn
                     int v_index = std::stoi(split_face_index(vertex_str, 0));
-                    indices.push_back(v_index - 1); // OBJ indices are 1-based
+                    int n_index = -1;
+                    
+                    // Try to get normal index (could be at position 2 if v//vn, or position 1 if v/vn)
+                    std::string n_str = split_face_index(vertex_str, 2);
+                    if (n_str.empty()) {
+                        n_str = split_face_index(vertex_str, 1);
+                    }
+                    if (!n_str.empty()) {
+                        try {
+                            n_index = std::stoi(n_str) - 1; // OBJ indices are 1-based
+                        } catch (...) {
+                            n_index = -1;
+                        }
+                    }
+                    
+                    v_indices.push_back(v_index - 1); // OBJ indices are 1-based
+                    n_indices.push_back(n_index);
                 }
 
                 // Triangulate if necessary (assume triangles or quads)
-                for (size_t i = 1; i + 1 < indices.size(); i++) {
-                    int idx0 = indices[0];
-                    int idx1 = indices[i];
-                    int idx2 = indices[i + 1];
+                for (size_t i = 1; i + 1 < v_indices.size(); i++) {
+                    int idx0 = v_indices[0];
+                    int idx1 = v_indices[i];
+                    int idx2 = v_indices[i + 1];
 
                     if (idx0 >= 0 && idx0 < (int)vertices.size() &&
                         idx1 >= 0 && idx1 < (int)vertices.size() &&
                         idx2 >= 0 && idx2 < (int)vertices.size()) {
                         
+                        // Create triangle with optional smooth normals
                         result.add(make_shared<triangle>(
                             vertices[idx0],
                             vertices[idx1],
                             vertices[idx2],
-                            mat
+                            mat,
+                            n_indices[0] >= 0 && n_indices[0] < (int)normals.size() ? unit_vector(normals[n_indices[0]]) : vec3(0,0,0),
+                            n_indices[i] >= 0 && n_indices[i] < (int)normals.size() ? unit_vector(normals[n_indices[i]]) : vec3(0,0,0),
+                            n_indices[i+1] >= 0 && n_indices[i+1] < (int)normals.size() ? unit_vector(normals[n_indices[i+1]]) : vec3(0,0,0)
                         ));
                     }
                 }

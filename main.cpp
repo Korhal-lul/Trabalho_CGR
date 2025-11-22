@@ -91,9 +91,9 @@ int main() {
     camera cam;
 
     cam.aspect_ratio      = 16.0 / 9.0;
-    cam.image_width       = 1200;          // maior -> melhor qualidade
-    cam.samples_per_pixel = 200;          // maior -> menos ruído
-    cam.max_depth         = 30;           // maior -> reflexões mais profundas
+    cam.image_width       = 4800;          // maior -> melhor qualidade
+    cam.samples_per_pixel = 1200;          // maior -> menos ruído
+    cam.max_depth         = 40;           // maior -> reflexões mais profundas
 
     #if USE_OBJ
         cam.vfov = 40;
